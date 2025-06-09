@@ -5,46 +5,49 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const Post = require('./models/post');
 const Contact = require('./models/contact');
+const methodOverride = require('method-override');
 
 app.set('view engine', 'ejs');
 
 const PORT = 3000;
 
-const db = 'mongodb://admin:1234@localhost:27017/njs_posts?authSource=admin';
+const db = 'mongodb://admin:1234@localhost:27017/njs_train?authSource=admin';
 
 mongoose
     .connect(db)
-    .then((res) => console.log('Подключение к БД'))
+    .then((res) => console.log('>>> Подключение к MongoDB'))
     .catch((error) => console.log(error));
 
 const createPath = (page) => path.resolve(__dirname, 'ejs-views', `${page}.ejs`);
 
 app.listen(PORT, (error) => {
-    error ? console.log(error) : console.log(`http://localhost:3000/ \nlistening port ${PORT}`);
+    error ? console.log(error) : console.log(`http://localhost:3000/ \n>>> Прослушивание порта: ${PORT}`)
 });
-
 
 // Миделвары
-app.use ((req, res, next) => {
-    console.log(`path: ${req.path}`);
-    console.log(`method: ${req.method}`);
-    next();
-});
+
+// app.use ((req, res, next) => {
+//     console.log(`path: ${req.path}`);
+//     console.log(`method: ${req.method}`);
+//     next();
+// });
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
 app.use(express.urlencoded({ extended: false }));
 
 app.use (express.static('styles'));
+
+app.use(methodOverride('_method'));
 // --------
 
 app.get('/', (req, res) => {
-    const title = 'Home';
+    const title = 'Главная';
     res.render(createPath('index'), { title });
 });
 
 app.get('/contacts', (req, res) => {
-    const title = 'Contacts';
+    const title = 'Контакты';
     Contact
      .find()
      .then((contacts) => res.render(createPath('contacts'), { contacts, title }))
@@ -55,7 +58,7 @@ app.get('/contacts', (req, res) => {
 });
 
 app.get('/posts/:id', (req, res) => {
-    const title = 'Post';
+    const title = 'Публикация';
     Post
      .findById(req.params.id)
      .then((post) => res.render(createPath('post'), { post, title }))
@@ -65,8 +68,44 @@ app.get('/posts/:id', (req, res) => {
      });
 });
 
+app.delete('/posts/:id', (req, res) => {
+    const title = 'Публикация';
+    Post
+     .findByIdAndDelete(req.params.id)
+     .then(result => {
+        res.sendStatus(200);
+     })
+     .catch((error) => {
+        console.log(error);
+        res.render(createPath('error'), { title: 'Error 404' });
+     });
+});
+
+app.get('/edit/:id', (req, res) => {
+    const title = 'Редактирование публикации';
+    Post
+     .findById(req.params.id)
+     .then((post) => res.render(createPath('edit-post'), { post, title }))
+     .catch((error) => {
+        console.log(error);
+        res.render(createPath('error'), { title: 'Error 404' });
+     });
+});
+
+app.put('/edit/:id', (req, res) => {
+    const { title, author, text} = req.body;
+    const { id } = req.params;
+    Post
+     .findByIdAndUpdate(id, { title, author, text })
+     .then(result => res.redirect(`/posts/${id}`))
+     .catch((error) => {
+        console.log(error);
+        res.render(createPath('error'), { title: 'Error 404' });
+     });
+});
+
 app.get('/posts', (req, res) => {
-    const title = 'Post';
+    const title = 'Публикации';
     Post
      .find()
      .sort({ createdAt: -1 })
@@ -90,7 +129,7 @@ app.post('/add-post', (req, res) => {
 });
 
 app.get('/add-post', (req, res) => {
-    const title = 'Add post';
+    const title = 'Новая публикация';
     res.render(createPath('add-post'), { title });
 });
 
