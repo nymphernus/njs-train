@@ -2,10 +2,20 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const morgan = require('morgan');
+const mongoose = require('mongoose');
+const Post = require('./models/post');
+const Contact = require('./models/contact');
 
 app.set('view engine', 'ejs');
 
 const PORT = 3000;
+
+const db = 'mongodb://admin:1234@localhost:27017/njs_posts?authSource=admin';
+
+mongoose
+    .connect(db)
+    .then((res) => console.log('Подключение к БД'))
+    .catch((error) => console.log(error));
 
 const createPath = (page) => path.resolve(__dirname, 'ejs-views', `${page}.ejs`);
 
@@ -35,49 +45,48 @@ app.get('/', (req, res) => {
 
 app.get('/contacts', (req, res) => {
     const title = 'Contacts';
-    const contacts = [
-        { name: 'TG', link: 'https://web.telegram.org' },
-        { name: 'VK', link: 'https://vk.com'}
-    ];
-    res.render(createPath('contacts'), { contacts, title});
+    Contact
+     .find()
+     .then((contacts) => res.render(createPath('contacts'), { contacts, title }))
+     .catch((error) => {
+        console.log(error);
+        res.render(createPath('error'), { title: 'Error 404' });
+     });
 });
 
 app.get('/posts/:id', (req, res) => {
     const title = 'Post';
-    const post = {
-        id: '1',
-        text: 'Это полный текст поста',
-        title: 'Название поста',
-        date: '06.06.2025',
-        author: 'Alex',
-    };
-    res.render(createPath('post'), { title, post });
+    Post
+     .findById(req.params.id)
+     .then((post) => res.render(createPath('post'), { post, title }))
+     .catch((error) => {
+        console.log(error);
+        res.render(createPath('error'), { title: 'Error 404' });
+     });
 });
 
 app.get('/posts', (req, res) => {
     const title = 'Post';
-    const posts = [
-        {
-        id: '1',
-        text: 'Это полный текст поста',
-        title: 'Название поста',
-        date: '06.06.2025',
-        author: 'Alex',
-        }
-    ];
-    res.render(createPath('posts'), { title, posts });
+    Post
+     .find()
+     .sort({ createdAt: -1 })
+     .then((posts) => res.render(createPath('posts'), { posts, title }))
+     .catch((error) => {
+        console.log(error);
+        res.render(createPath('error'), { title: 'Error 404' });
+     });
 });
 
 app.post('/add-post', (req, res) => {
     const { title, author, text } = req.body;
-    const post = {
-        id: new Date(),
-        date: (new Date()).toLocaleDateString(),
-        title,
-        author,
-        text,
-    };
-    res.render(createPath('post'), { title, post});
+    const post = new Post({ title, author, text });
+    post
+     .save()
+     .then((result) => res.redirect('posts'))
+     .catch((error) => {
+        console.log(error);
+        res.render(createPath('error'), { title: 'Error 404'})
+     });
 });
 
 app.get('/add-post', (req, res) => {
