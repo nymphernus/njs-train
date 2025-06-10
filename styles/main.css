@@ -5,6 +5,14 @@ body {
   font-size: 20px;
   background: linear-gradient(to bottom, #a65ceb, #a9d7df);
   color: #fff;
+  position: relative;
+}
+
+.home-txt {
+  padding-top: 8%;
+  display: grid;
+  place-items: center;
+  font-size: 40px;
 }
 
 h1 {
