@@ -1,22 +1,31 @@
 {
   "name": "node-js",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js"
   },
-  "author": "",
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nymphernus/njs-train.git"
+  },
+  "author": "nymphernus",
   "license": "ISC",
   "description": "",
   "devDependencies": {
     "nodemon": "^3.1.10"
   },
   "dependencies": {
+    "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "method-override": "^3.0.0",
     "mongoose": "^8.15.1",
     "morgan": "^1.10.0"
+  },
+  "engines": {
+    "node": "22.16.0"
   }
 }

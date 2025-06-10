@@ -10,7 +10,7 @@
         <li>
           <article>
             <h2>
-              <a href="/posts/<%= id %>"><%= title %></a>
+              <a href="/post/<%= id %>"><%= title %></a>
             </h2>
             <p><%= text %></p>
             
@@ -35,7 +35,7 @@
     document.addEventListener('click', (e) => {
       const id = e.target?.dataset?.id || null;
       if(id) {
-        fetch(`/posts/${id}`, {
+        fetch(`/post/${id}`, {
           method: 'DELETE',
         }).then(() => {
           window.location.reload();

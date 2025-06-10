@@ -36,7 +36,7 @@ const editPost = (req, res) => {
     const { id } = req.params;
     Post
      .findByIdAndUpdate(id, { title, author, text })
-     .then(result => res.redirect(`/posts/${id}`))
+     .then(result => res.redirect(`/post/${id}`))
      .catch((error) => handleError(res, error));
 
 };
@@ -51,7 +51,7 @@ const getPosts = (req, res) => {
 
 };
 
-const getAddPost = (req, res) => {
+const addPost = (req, res) => {
     const { title, author, text } = req.body;
     const post = new Post({ title, author, text });
     post
@@ -61,7 +61,7 @@ const getAddPost = (req, res) => {
 
 };
 
-const addPost = (req, res) => {
+const getAddPost = (req, res) => {
     const title = 'Новая публикация';
     res.render(createPath('add-post'), { title });
 
